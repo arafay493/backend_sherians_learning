@@ -1,7 +1,7 @@
 {
   "name": "backend_sherians",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "script.js",
   "type": "module",
   "scripts": {
     "start": "nodemon script.js"
