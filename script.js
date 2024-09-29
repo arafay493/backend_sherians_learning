@@ -2,6 +2,11 @@ import express from 'express';
 const app = express();
 const PORT = 8000
 
+app.use(express.json())
+app.use(express.urlencoded({
+    extended: true  // to parse URL encoded data (like form-data) into req.body object
+}))
+
 // Middleware 1
 
 function middleware1(req, res, next) {
