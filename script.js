@@ -85,52 +85,124 @@
 // });
 
 //? ********************************* Learning Mongodb
+// import express from "express";
+// import { User } from "./usermodel.js";
+// const app = express();
+
+// app.get("/", (req, res) => {
+//   res.send("Hello World!");
+// });
+
+// app.get("/create", async (req, res) => {
+//   const createdUser = await User.create({
+//     name: "Izhan",
+//     email: "izhan@example.com",
+//     age: 30,
+//   });
+
+//   res.send(`User created: ${createdUser.name}`);
+// });
+
+// app.get("/update", async (req, res) => {
+//   // const updatedUser = await User.findByIdAndUpdate(
+//   //   "615684865d27065a32757441",
+//   //   { age: 31 },
+//   //   { new: true }
+//   // );
+//   const updatedUser = await User.findOneAndUpdate(
+//     { _id: "66fc4d13192ed43014dcb729" },
+//     { age: 50 },
+//     { new: true }
+//   );
+
+//   res.json(`User updated: ${updatedUser}`);
+// });
+
+// app.get("/read", async (req, res) => {
+//   let users = await User.find();
+//   res.json(`Users List: ${users}`);
+// });
+
+// app.get("/readone", async (req, res) => {
+//   let user = await User.findOne({ name: "Izhan" });
+//   res.send(user);
+// });
+
+// app.get("/delete", async (req, res) => {
+//   let user = await User.findOneAndDelete({ name: "Jhon Doe" });
+//   res.send("User deleted: " + user);
+// });
+
+// const PORT = process.env.PORT || 8000;
+
+// app.listen(PORT, () => {
+//   console.log(`Server is running on port ${PORT}`);
+// });
+
+//? ********************************* Creating APIs ********************************
 import express from "express";
 import { User } from "./usermodel.js";
 const app = express();
+
+app.use(express.json());
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
-app.get("/create", async (req, res) => {
-  const createdUser = await User.create({
-    name: "Izhan",
-    email: "izhan@example.com",
-    age: 30,
-  });
-
-  res.send(`User created: ${createdUser.name}`);
-});
-
-app.get("/update", async (req, res) => {
-  // const updatedUser = await User.findByIdAndUpdate(
-  //   "615684865d27065a32757441",
-  //   { age: 31 },
-  //   { new: true }
-  // );
-  const updatedUser = await User.findOneAndUpdate(
-    { _id: "66fc4d13192ed43014dcb729" },
-    { age: 50 },
-    { new: true }
-  );
-
-  res.json(`User updated: ${updatedUser}`);
-});
-
 app.get("/read", async (req, res) => {
   let users = await User.find();
-  res.json(`Users List: ${users}`);
+  res.send(users);
 });
 
 app.get("/readone", async (req, res) => {
-  let user = await User.findOne({ name: "Izhan" });
-  res.send(user);
+  try {
+    let user = await User.findOne(req.query);
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    res.send(user);
+  } catch (error) {
+    console.log(error.message);
+    res.status(404).send({ message: error.message });
+  }
 });
 
-app.get("/delete", async (req, res) => {
-  let user = await User.findOneAndDelete({ name: "Jhon Doe" });
-  res.send("User deleted: " + user);
+app.post("/create", async (req, res) => {
+  console.log(req.body);
+  try {
+    const createdUser = await User.create(req.body);
+    res.send(req.body);
+    if (!createdUser) throw new Error("Something went wrong");
+  } catch (error) {
+    console.log(error.message);
+    res.status(400).send({ message: error.message });
+  }
+});
+
+app.put("/update", async (req, res) => {
+  const updatedUser = await User.findOneAndUpdate(
+    { _id: req.query._id },
+    req.body,
+    { new: true }
+  );
+  res.send(updatedUser);
+});
+
+app.patch("/update", async (req, res) => {
+  const updatedUser = await User.findOneAndUpdate(
+    { _id: req.query._id },
+    req.body,
+    { new: true }
+  );
+  res.send(updatedUser);
+});
+
+app.delete("/delete", async (req, res) => {
+  let user = await User.findOneAndDelete({ _id: req.body._id });
+  res.send(user);
 });
 
 const PORT = process.env.PORT || 8000;
