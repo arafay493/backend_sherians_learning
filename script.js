@@ -140,72 +140,175 @@
 // });
 
 //? ********************************* Creating APIs ********************************
+// import express from "express";
+// import { User } from "./usermodel.js";
+// const app = express();
+
+// app.use(express.json());
+
+// app.get("/", (req, res) => {
+//   res.send("Hello World!");
+// });
+
+// app.get("/read", async (req, res) => {
+//   let users = await User.find();
+//   res.send(users);
+// });
+
+// app.get("/readone", async (req, res) => {
+//   try {
+//     let user = await User.findOne(req.query);
+
+//     if (!user) {
+//       throw new Error("User not found");
+//     }
+
+//     res.send(user);
+//   } catch (error) {
+//     console.log(error.message);
+//     res.status(404).send({ message: error.message });
+//   }
+// });
+
+// app.post("/create", async (req, res) => {
+//   console.log(req.body);
+//   try {
+//     const createdUser = await User.create(req.body);
+//     res.send(req.body);
+//     if (!createdUser) throw new Error("Something went wrong");
+//   } catch (error) {
+//     console.log(error.message);
+//     res.status(400).send({ message: error.message });
+//   }
+// });
+
+// app.put("/update", async (req, res) => {
+//   const updatedUser = await User.findOneAndUpdate(
+//     { _id: req.query._id },
+//     req.body,
+//     { new: true }
+//   );
+//   res.send(updatedUser);
+// });
+
+// app.patch("/update", async (req, res) => {
+//   const updatedUser = await User.findOneAndUpdate(
+//     { _id: req.query._id },
+//     req.body,
+//     { new: true }
+//   );
+//   res.send(updatedUser);
+// });
+
+// app.delete("/delete", async (req, res) => {
+//   let user = await User.findOneAndDelete({ _id: req.body._id });
+//   res.send(user);
+// });
+
+// const PORT = process.env.PORT || 8000;
+
+// app.listen(PORT, () => {
+//   console.log(`Server is running on port ${PORT}`);
+// });
+
+//? ********************************* Creating APIs With Proper Error Handling ********************************
+// import express from "express";
+// import { User } from "./usermodel.js";
+// const app = express();
+
+// app.use(express.json());
+
+// app.get("/", (req, res) => {
+//   res.send("Hello World!");
+// });
+
+// app.get("/read", async (req, res) => {
+//   let users = await User.find();
+//   res.send(users);
+// });
+
+// app.get("/readone", async (req, res) => {
+//   try {
+//     if(!req.query.name) return res.send({ message : "Naam De"})
+//     let user = await User.findOne(req.query);
+
+//     if (!user) {
+//       throw new Error("User not found");
+//     }
+//     res.send(user);
+//   } catch (error) {
+//     console.log(error.message);
+//     res.status(404).send({ message: error.message });
+//   }
+// });
+
+// app.post("/create", async (req, res) => {
+//   console.log(req.body);
+//   const {name , email, age} = req.body;
+//   try {
+//     const createdUser = await User.create(req.body);
+//     res.send(req.body);
+//     if (!createdUser) throw new Error("Something went wrong");
+//   } catch (error) {
+//     console.log(error.message);
+//     res.status(400).send({ message: error.message });
+//   }
+// });
+
+// app.put("/update", async (req, res) => {
+//   const updatedUser = await User.findOneAndUpdate(
+//     { _id: req.query._id },
+//     req.body,
+//     { new: true }
+//   );
+//   res.send(updatedUser);
+// });
+
+// app.patch("/update", async (req, res) => {
+//   const updatedUser = await User.findOneAndUpdate(
+//     { _id: req.query._id },
+//     req.body,
+//     { new: true }
+//   );
+//   res.send(updatedUser);
+// });
+
+// app.delete("/delete", async (req, res) => {
+//   let user = await User.findOneAndDelete({ _id: req.body._id });
+//   res.send(user);
+// });
+
+// const PORT = process.env.PORT || 8000;
+
+// app.listen(PORT, () => {
+//   console.log(`Server is running on port ${PORT}`);
+// });
+
+//? ********************************* CRUD Operations with EJS and Server Side Rendering ********************************
+
 import express from "express";
-import { User } from "./usermodel.js";
+import path from "path";
+import { fileURLToPath } from 'url';
+
+// Get the current directory using ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const app = express();
-
-app.use(express.json());
-
-app.get("/", (req, res) => {
-  res.send("Hello World!");
-});
-
-app.get("/read", async (req, res) => {
-  let users = await User.find();
-  res.send(users);
-});
-
-app.get("/readone", async (req, res) => {
-  try {
-    let user = await User.findOne(req.query);
-
-    if (!user) {
-      throw new Error("User not found");
-    }
-
-    res.send(user);
-  } catch (error) {
-    console.log(error.message);
-    res.status(404).send({ message: error.message });
-  }
-});
-
-app.post("/create", async (req, res) => {
-  console.log(req.body);
-  try {
-    const createdUser = await User.create(req.body);
-    res.send(req.body);
-    if (!createdUser) throw new Error("Something went wrong");
-  } catch (error) {
-    console.log(error.message);
-    res.status(400).send({ message: error.message });
-  }
-});
-
-app.put("/update", async (req, res) => {
-  const updatedUser = await User.findOneAndUpdate(
-    { _id: req.query._id },
-    req.body,
-    { new: true }
-  );
-  res.send(updatedUser);
-});
-
-app.patch("/update", async (req, res) => {
-  const updatedUser = await User.findOneAndUpdate(
-    { _id: req.query._id },
-    req.body,
-    { new: true }
-  );
-  res.send(updatedUser);
-});
-
-app.delete("/delete", async (req, res) => {
-  let user = await User.findOneAndDelete({ _id: req.body._id });
-  res.send(user);
-});
-
 const PORT = process.env.PORT || 8000;
+
+app.set('view engine', 'ejs');
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.get('/', (req, res) =>{
+  res.render('index', { title: 'User List', message: 'This is a Home page', users: [] });
+})
+
+app.get('/read', (req, res) =>{
+  res.render('read', { title: 'User List', message: 'This is a Home page', users: [] });
+})
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
