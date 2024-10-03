@@ -337,6 +337,36 @@ app.get("/delete/:id", async (req, res) => {
   }
 });
 
+app.get("/edit/:id", async (req, res) => {
+  try {
+    const user = await User.findOne({ _id: req.params.id });
+    res.render("edit", { user });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Server Error");
+  }
+});
+
+app.post("/update/:id", async (req, res) => {
+  try {
+    const { name, email, image } = req.body;
+    const user = await User.findOneAndUpdate(
+      { _id: req.params.id },
+      {
+        name,
+        email,
+        image,
+      },
+      {
+        new: true,
+      }
+    );
+    res.redirect("/read");
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Server Error");
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
