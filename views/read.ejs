@@ -12,27 +12,27 @@
     <p><%=message%></p> -->
     <div class="w-full h-full bg-zinc-900 p-10 text-white">
       <div class="mb-2">
-        <a href="/" class="text-lg text-purple-700 underline"
-          >Go to Home ></a
-        >
+        <a href="/" class="text-lg text-purple-700 underline">Go to Home ></a>
       </div>
       <h1 class="text-xl mb-10">All Users</h1>
       <div class="flex flex-wrap gap-2 justify-evenly">
+        <% users.forEach(function(user){ %>
         <div
           class="flex flex-col gap-2 h-[350px] w-[250px] p-3 text-white bg-zinc-700 rounded-md"
         >
-          <div class="flex-1 bg-zinc-500 rounded-lg">
-            <img src="" alt="user-image" width="100%" />
+          <div class="flex-1 overflow-hidden bg-zinc-500 rounded-lg">
+            <img src="<%=user.image%>" alt="user-image" width="100%" height="100%" />
           </div>
           <div>
-            <h3 class="text-xl">Komail</h3>
-            <h5 class="text-zinc-500">komail@gmail.com</h5>
+            <h3 class="text-xl"><%=user.name%></h3>
+            <h5 class="text-zinc-500"><%=user.email%></h5>
             <div class="flex justify-between mt-4">
               <button class="px-5 py-1 bg-blue-500 rounded-md">Edit</button>
-              <button class="px-5 py-1 bg-red-500 rounded-md">Delete</button>
+              <a class="px-5 py-1 bg-red-500 rounded-md" href="/delete/<%=user._id%>">Delete</a>
             </div>
           </div>
         </div>
+        <% }) %>
       </div>
     </div>
   </body>
