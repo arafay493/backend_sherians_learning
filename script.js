@@ -372,7 +372,85 @@
 //   console.log(`Server is running on port ${PORT}`);
 // });
 
-//? ********************************* Authentication , Authorization, Cookies , JWT, Bcrypt ********************************
+//? ********************************* Authentication , Authorization, Cookies , JWT, Bcrypt *******************************
 
+import cookieParser from "cookie-parser";
 import express from "express";
+import bcrypt from "bcrypt";
+const app = express();
+// require('dotenv').config()
+const port = process.env.PORT || 8000;
 
+app.use(cookieParser());
+
+app.get("/", (req, res) => {
+  res.cookie("name", "harsh");
+  res.send("Done :)");
+});
+
+app.get("/read", (req, res) => {
+  console.log(req.cookies);
+  res.send("Read Page :) " + req.cookies.name);
+});
+
+// app.get("/password", (req, res) => {
+//   //   //todo: Method 1
+//   //   try {
+//   //     bcrypt.genSalt(10, (err, salt) => {
+//   //       if (err) throw err;
+//   //       bcrypt.hash("password", salt, (err, hash) => {
+//   //         if (err) throw err;
+//   //         console.log("Password hashed : " + hash);
+//   //         res.send("Password :) " + hash);
+//   //       });
+//   //     });
+//   //   } catch (error) {
+//   //     console.log(error);
+//   //   }
+
+//   //todo: Method 2
+// //   try {
+// //     const salt = 10;
+// //     bcrypt.hash("password", salt, (err, hash) => {
+// //       if (err) throw err;
+// //       console.log("Password hashed : " + hash);
+// //       res.send("Password :) " + hash);
+// //     });
+// //   } catch (error) {
+// //     console.log(error);
+// //   }
+// });
+
+const loginUser = (plainPassword, hashedPassword) => {
+   bcrypt.compare(plainPassword, hashedPassword, (err, result) => {
+     if (err) throw err;
+     if (result) {
+       console.log("Password matches!");
+       // Login successful
+     } else {
+       console.log("Invalid password!");
+     }
+   });
+ };
+
+app.get("/password", async (req, res) => {
+  //todo: Method 3
+  const hash = await bcrypt.hash("password", 10);
+  try {
+    console.log("Password hashed: " + hash);
+    res.send("Password :) " + hash);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error hashing password");
+  } finally {
+    console.log("Finally function executed!");
+   //  const compare = bcrypt.compare("password" , hash);
+   //  console.log("Is password correct? : " + compare);
+   loginUser('myPassword123', hash); //* Invalid password
+   loginUser('password', hash); //* Password Matches!
+  }
+});
+
+app.listen(port, () =>
+  console.log("> Server is up and running on port : " + port)
+);
