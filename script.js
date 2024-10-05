@@ -286,88 +286,93 @@
 
 //? ********************************* CRUD Operations with EJS and Server Side Rendering ********************************
 
+// import express from "express";
+// import path from "path";
+// import { fileURLToPath } from "url";
+// import { User } from "./models/user.js";
+
+// // Get the current directory using ES modules
+// const __filename = fileURLToPath(import.meta.url);
+// const __dirname = path.dirname(__filename);
+
+// const app = express();
+// const PORT = process.env.PORT || 8000;
+
+// app.set("view engine", "ejs");
+// app.use(express.json());
+// app.use(express.urlencoded({ extended: true }));
+// app.use(express.static(path.join(__dirname, "public")));
+
+// app.get("/", (req, res) => {
+//   res.render("index", {
+//     title: "User List",
+//     message: "This is a Home page",
+//     users: [],
+//   });
+// });
+
+// app.get("/read", async (req, res) => {
+//   const AllUsers = await User.find();
+//   res.render("read", {
+//     title: "User List",
+//     message: "This is a Home page",
+//     users: AllUsers,
+//   });
+// });
+
+// app.post("/create", async (req, res) => {
+//   const { name, email, image } = req.body;
+//   let createdUser = await User.create({ name, email, image });
+//   // res.send(createdUser);
+//   res.redirect("/read");
+// });
+
+// app.get("/delete/:id", async (req, res) => {
+//   try {
+//     await User.findOneAndDelete({ _id: req.params.id });
+//     res.redirect("/read");
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).send("Server Error");
+//   }
+// });
+
+// app.get("/edit/:id", async (req, res) => {
+//   try {
+//     const user = await User.findOne({ _id: req.params.id });
+//     res.render("edit", { user });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).send("Server Error");
+//   }
+// });
+
+// app.post("/update/:id", async (req, res) => {
+//   try {
+//     const { name, email, image } = req.body;
+//     const user = await User.findOneAndUpdate(
+//       { _id: req.params.id },
+//       {
+//         name,
+//         email,
+//         image,
+//       },
+//       {
+//         new: true,
+//       }
+//     );
+//     res.redirect("/read");
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).send("Server Error");
+//   }
+// });
+
+// app.listen(PORT, () => {
+//   console.log(`Server is running on port ${PORT}`);
+// });
+
+//? ********************************* Authentication , Authorization, Cookies , JWT, Bcrypt ********************************
+
 import express from "express";
-import path from "path";
-import { fileURLToPath } from "url";
-import { User } from "./models/user.js";
 
-// Get the current directory using ES modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const app = express();
-const PORT = process.env.PORT || 8000;
-
-app.set("view engine", "ejs");
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, "public")));
-
-app.get("/", (req, res) => {
-  res.render("index", {
-    title: "User List",
-    message: "This is a Home page",
-    users: [],
-  });
-});
-
-app.get("/read", async (req, res) => {
-  const AllUsers = await User.find();
-  res.render("read", {
-    title: "User List",
-    message: "This is a Home page",
-    users: AllUsers,
-  });
-});
-
-app.post("/create", async (req, res) => {
-  const { name, email, image } = req.body;
-  let createdUser = await User.create({ name, email, image });
-  // res.send(createdUser);
-  res.redirect("/read");
-});
-
-app.get("/delete/:id", async (req, res) => {
-  try {
-    await User.findOneAndDelete({ _id: req.params.id });
-    res.redirect("/read");
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("Server Error");
-  }
-});
-
-app.get("/edit/:id", async (req, res) => {
-  try {
-    const user = await User.findOne({ _id: req.params.id });
-    res.render("edit", { user });
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("Server Error");
-  }
-});
-
-app.post("/update/:id", async (req, res) => {
-  try {
-    const { name, email, image } = req.body;
-    const user = await User.findOneAndUpdate(
-      { _id: req.params.id },
-      {
-        name,
-        email,
-        image,
-      },
-      {
-        new: true,
-      }
-    );
-    res.redirect("/read");
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("Server Error");
-  }
-});
-
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
