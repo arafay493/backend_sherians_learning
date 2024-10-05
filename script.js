@@ -377,21 +377,22 @@
 import cookieParser from "cookie-parser";
 import express from "express";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 const app = express();
 // require('dotenv').config()
 const port = process.env.PORT || 8000;
 
 app.use(cookieParser());
 
-app.get("/", (req, res) => {
-  res.cookie("name", "harsh");
-  res.send("Done :)");
-});
+// app.get("/", (req, res) => {
+//   res.cookie("name", "harsh");
+//   res.send("Done :)");
+// });
 
-app.get("/read", (req, res) => {
-  console.log(req.cookies);
-  res.send("Read Page :) " + req.cookies.name);
-});
+// app.get("/read", (req, res) => {
+//   console.log(req.cookies);
+//   res.send("Read Page :) " + req.cookies.name);
+// });
 
 // app.get("/password", (req, res) => {
 //   //   //todo: Method 1
@@ -421,34 +422,97 @@ app.get("/read", (req, res) => {
 // //   }
 // });
 
-const loginUser = (plainPassword, hashedPassword) => {
-   bcrypt.compare(plainPassword, hashedPassword, (err, result) => {
-     if (err) throw err;
-     if (result) {
-       console.log("Password matches!");
-       // Login successful
-     } else {
-       console.log("Invalid password!");
-     }
-   });
- };
+// const loginUser = (plainPassword, hashedPassword) => {
+//    bcrypt.compare(plainPassword, hashedPassword, (err, result) => {
+//      if (err) throw err;
+//      if (result) {
+//        console.log("Password matches!");
+//        // Login successful
+//      } else {
+//        console.log("Invalid password!");
+//      }
+//    });
+//  };
 
-app.get("/password", async (req, res) => {
-  //todo: Method 3
-  const hash = await bcrypt.hash("password", 10);
-  try {
-    console.log("Password hashed: " + hash);
-    res.send("Password :) " + hash);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Error hashing password");
-  } finally {
-    console.log("Finally function executed!");
-   //  const compare = bcrypt.compare("password" , hash);
-   //  console.log("Is password correct? : " + compare);
-   loginUser('myPassword123', hash); //* Invalid password
-   loginUser('password', hash); //* Password Matches!
-  }
+// app.get("/password", async (req, res) => {
+//   //todo: Method 3
+//   const hash = await bcrypt.hash("password", 10);
+//   try {
+//     console.log("Password hashed: " + hash);
+//     res.send("Password :) " + hash);
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).send("Error hashing password");
+//   } finally {
+//     console.log("Finally function executed!");
+//    //  const compare = bcrypt.compare("password" , hash);
+//    //  console.log("Is password correct? : " + compare);
+//    loginUser('myPassword123', hash); //* Invalid password
+//    loginUser('password', hash); //* Password Matches!
+//   }
+// });
+
+// app.get("/", function (req, res) {
+//   const SECRET_KEY = process.env.SECRET_KEY || "password";
+
+//   function Script(req, res, next) {
+//     const authorization = req.headers.authorization;
+//     if (!authorization) {
+//       return res.status(401).json({
+//         message: "No Authorization Header",
+//       });
+//     }
+//     try {
+//       const token = authorization.split("Bearer ")[1];
+//       if (!token) {
+//         return res.status(401).json({
+//           message: "Invalid Token Format",
+//         });
+//       }
+//       const decode = jwt.verify(token, SECRET_KEY);
+//       req.user = decode;
+//       next();
+//     } catch (error) {
+//       if (error instanceof jwt.TokenExpiredError) {
+//         return res.status(401).json({
+//           message: "Session Expired",
+//           error: error.message,
+//         });
+//       }
+//       if (
+//         error instanceof jwt.JsonWebTokenError ||
+//         error instanceof TokenError
+//       ) {
+//         return res.status(401).json({
+//           message: "Invalid Token",
+//           error: error.message,
+//         });
+//       }
+//       res.status(500).json({
+//         message: "Internal server Error",
+//         error: error.message,
+//         stack: error.stack,
+//       });
+//     }
+//   }
+
+//   module.exports = Script;
+// });
+
+app.get("/", function (req, res) {
+  // Generate JWT token
+  const SECRET_KEY = process.env.SECRET_KEY || "password";
+  const user = { id: 1, name: "John Doe", email: "jhon@gmail.com" };
+  const token = jwt.sign(user, SECRET_KEY);
+  res.cookie("token", token);
+  res.send("Done");
+});
+
+app.get("/read", (req, res) => {
+  const SECRET_KEY = process.env.SECRET_KEY || "password";
+  const data = jwt.verify(req.cookies.token, SECRET_KEY);
+  res.send("Read Page :) " + data.email);
+  //   res.send("Read Page :) " + req.cookie.token);
 });
 
 app.listen(port, () =>
