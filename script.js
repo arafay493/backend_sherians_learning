@@ -374,15 +374,15 @@
 
 //? ********************************* Authentication , Authorization, Cookies , JWT, Bcrypt *******************************
 
-import cookieParser from "cookie-parser";
-import express from "express";
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
-const app = express();
-// require('dotenv').config()
-const port = process.env.PORT || 8000;
+// import cookieParser from "cookie-parser";
+// import express from "express";
+// import bcrypt from "bcrypt";
+// import jwt from "jsonwebtoken";
+// const app = express();
+// // require('dotenv').config()
+// const port = process.env.PORT || 8000;
 
-app.use(cookieParser());
+// app.use(cookieParser());
 
 // app.get("/", (req, res) => {
 //   res.cookie("name", "harsh");
@@ -499,22 +499,109 @@ app.use(cookieParser());
 //   module.exports = Script;
 // });
 
-app.get("/", function (req, res) {
-  // Generate JWT token
-  const SECRET_KEY = process.env.SECRET_KEY || "password";
-  const user = { id: 1, name: "John Doe", email: "jhon@gmail.com" };
-  const token = jwt.sign(user, SECRET_KEY);
-  res.cookie("token", token);
-  res.send("Done");
+// app.get("/", function (req, res) {
+//   // Generate JWT token
+//   const SECRET_KEY = process.env.SECRET_KEY || "password";
+//   const user = { id: 1, name: "John Doe", email: "jhon@gmail.com" };
+//   const token = jwt.sign(user, SECRET_KEY);
+//   res.cookie("token", token);
+//   res.send("Done");
+// });
+
+// app.get("/read", (req, res) => {
+//   const SECRET_KEY = process.env.SECRET_KEY || "password";
+//   const data = jwt.verify(req.cookies.token, SECRET_KEY);
+//   res.send("Read Page :) " + data.email);
+//   //   res.send("Read Page :) " + req.cookie.token);
+// });
+
+// app.listen(port, () =>
+//   console.log("> Server is up and running on port : " + port)
+// );
+
+//? ********************************* Practical Example - Authentication , Authorization, Cookies , JWT, Bcrypt *******************************
+
+import express from "express";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+import { UserModel } from "./models/user.model.js";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import cors from "cors";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const app = express();
+// require("dotenv").config();
+const PORT = process.env.PORT || 8000;
+
+app.set("view engine", "ejs");
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(`${__dirname}/public`));
+app.get("/", (req, res) => {
+  // res.render("auth", {
+  //   title: "Home Page",
+  //   message: "Form Submitted",
+  //   // message: req.flash('message')
+  // });
+  res.send("Welcome");
 });
 
-app.get("/read", (req, res) => {
-  const SECRET_KEY = process.env.SECRET_KEY || "password";
-  const data = jwt.verify(req.cookies.token, SECRET_KEY);
-  res.send("Read Page :) " + data.email);
-  //   res.send("Read Page :) " + req.cookie.token);
+app.post("/create", async (req, res) => {
+  try {
+    const { name, email, password, age } = req.body;
+    let createdUser = await UserModel.create({
+      name,
+      email,
+      password: await bcrypt.hash(password, 10), // * Method 2
+      age,
+      // password: bcrypt.hashSync(password, 10), // * Method 1
+      // password: bcrypt.hash(password, 10).then((hash) => hash), // * Method 3
+    });
+    let token = jwt.sign({ name, email, age }, "SECRET");
+    // Set the token in the cookie with proper options
+    // res.cookie("token", token, {
+    //   httpOnly: true, // Makes the cookie inaccessible to JavaScript
+    //   secure: false, // Set true only if you're using HTTPS
+    //   sameSite: "Lax", // Controls the cookie cross-site behavior
+    // });
+    res.cookie("token", token);
+    // res.cookie("token", token, { httpOnly: true });
+    // res.cookie("token", token, { httpOnly: true, secure: process.env.NODE_ENV === "production" });
+    res.send({ token: token });
+  } catch (error) {
+    res.status(500).send("Error creating user: " + error.message);
+  }
 });
 
-app.listen(port, () =>
-  console.log("> Server is up and running on port : " + port)
+app.post("/logout", async (req, res) => {
+  try {
+    res.cookie("token", "");
+    res.send("logout successfully");
+  } catch (error) {
+    res.status(500).send("Error in logging out the user: " + error.message);
+  }
+});
+
+app.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await UserModel.findOne({ email });
+    if (!user) res.send({ message: "User Does not Exist" });
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) res.send({ message: "Invalid Password" });
+    let token = jwt.sign(
+      { name: user.name, email: user.email, age: user.age },
+      "SECRET"
+    );
+    res.cookie("token", token);
+    res.send({message: "login successfully"});
+  } catch (error) {
+    res.status(500).send("Error in logging in the user: " + error.message);
+  }
+});
+app.listen(PORT, () =>
+  console.log("> Server is up and running on port : " + PORT)
 );
