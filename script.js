@@ -608,43 +608,99 @@
 
 //? ********************************* Data Association *******************************
 
+// import express from "express";
+// import { User } from "./models/userData.js";
+// import { Post } from "./models/postData.js";
+// const app = express();
+// const port = process.env.PORT || 8000;
+// app.get("/", (req, res) => {
+//   res.send("hello from simple server :)");
+// });
+
+// app.get("/create", async (req, res) => {
+//   //todo:
+//   // const user = new User({
+//   //   name: "John Doe",
+//   //   email: "john@example.com",
+//   //   age: 30,
+//   // });
+
+//   const user = await User.create({
+//     name: "John",
+//     email: "john@example.com",
+//     age: 30,
+//   });
+//   res.send(user);
+// });
+
+// app.get("/post/create", async (req, res) => {
+//   const post = await Post.create({
+//     postData: "My First Post",
+//     user: "67038f0c1e9802b58964820c", // Replace with actual user id
+//   });
+
+//   const user = await User.findOne({ _id: "67038f0c1e9802b58964820c" });
+//   console.log(user);
+//   user.posts.push(post._id);
+//   await user.save();
+//   res.send({ post, user });
+//   // res.send("Post created successfully");
+// });
+
+// app.listen(port, () =>
+//   console.log("> Server is up and running on port : " + port)
+// );
+
+//? ********************************* Data Association____Mini-Project *******************************
+
 import express from "express";
-import { User } from "./models/userData.js";
-import { Post } from "./models/postData.js";
+import bcrypt from "bcrypt";
+import { User } from "./models/Mini_Project/user.model.js";
 const app = express();
 const port = process.env.PORT || 8000;
+
+//todo: Middlewares
+app.use(express.json());
+
 app.get("/", (req, res) => {
   res.send("hello from simple server :)");
 });
 
-app.get("/create", async (req, res) => {
-  //todo:
-  // const user = new User({
-  //   name: "John Doe",
-  //   email: "john@example.com",
-  //   age: 30,
-  // });
+app.post("/create", async (req, res) => {
+  const { username, name, email, password, age } = req.body;
+  const existingUser = await User.findOne({ email: email });
+  console.log(existingUser);
+  if (existingUser) {
+    return res
+      .status(409)
+      .send({ message: "User with the same email already exists" });
+  }
 
-  const user = await User.create({
-    name: "John",
-    email: "john@example.com",
-    age: 30,
-  });
-  res.send(user);
-});
-
-app.get("/post/create", async (req, res) => {
-  const post = await Post.create({
-    postData: "My First Post",
-    user: "67038f0c1e9802b58964820c", // Replace with actual user id
-  });
-
-  const user = await User.findOne({ _id: "67038f0c1e9802b58964820c" });
-  console.log(user);
-  user.posts.push(post._id);
-  await user.save();
-  res.send({ post, user });
-  // res.send("Post created successfully");
+  try {
+    const createdUser = await User.create({
+      username,
+      name,
+      email,
+      password: await bcrypt.hash(password, 10),
+      age,
+    });
+    if (!createdUser) throw new Error("Error creating user");
+    res.send(createdUser);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ message: "Error creating user" });
+  }
+  // const createdUser = await User.create(
+  //   { username, name, email, password, age },
+  //   (err, user) => {
+  //     if (err) {
+  //       console.error("Error creating user: ", err);
+  //       res.status(500).send("Error creating user");
+  //     } else {
+  //       res.send(user);
+  //     }
+  //   }
+  // );
 });
 
 app.listen(port, () =>
