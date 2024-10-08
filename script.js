@@ -710,6 +710,36 @@ app.post("/create", async (req, res) => {
   // );
 });
 
+app.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const existingUser = await User.findOne({ email: email });
+    if (!existingUser) return res.status(403).send({ message: "User not found" });
+    const match = await bcrypt.compare(password, existingUser.password);
+    if (!match) return res.status(401).send({ message: "Invalid Password" });
+    const token = await jwt.sign(
+      { existingUser },
+      "SECRET_KEY"
+      // { expiresIn: "1h" }
+    );
+    res.cookie("token", token);
+    res.send({ token, existingUser });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ message: "Login Failed" });
+  }
+});
+
+app.post("/logout", async (req, res) => {
+  try {
+    res.clearCookie("token", { path: "/" });
+    res.send({ message : "Loggedout Successful!" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ message: "Loggedout Failed" });
+  }
+});
+
 app.listen(port, () =>
   console.log("> Server is up and running on port : " + port)
 );
