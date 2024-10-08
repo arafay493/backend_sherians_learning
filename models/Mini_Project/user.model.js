@@ -31,6 +31,12 @@ const userSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  posts: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Post",
+    },
+  ]
 });
 
 //Export the model

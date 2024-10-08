@@ -655,6 +655,7 @@
 
 import express from "express";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import { User } from "./models/Mini_Project/user.model.js";
 const app = express();
 const port = process.env.PORT || 8000;
@@ -685,7 +686,13 @@ app.post("/create", async (req, res) => {
       age,
     });
     if (!createdUser) throw new Error("Error creating user");
-    res.send(createdUser);
+    const token = await jwt.sign(
+      { username, name, email, age },
+      "SECRET_KEY"
+      // { expiresIn: "1h" }
+    );
+    res.cookie("token", token);
+    res.send({ token, createdUser });
   } catch (error) {
     console.error(error);
     res.status(500).send({ message: "Error creating user" });
