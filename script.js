@@ -657,11 +657,28 @@ import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { User } from "./models/Mini_Project/user.model.js";
+import cookieParser from "cookie-parser";
 const app = express();
 const port = process.env.PORT || 8000;
 
 //todo: Middlewares
 app.use(express.json());
+app.use(cookieParser());
+// app.use(
+//   cookieParser(),
+//   async (req, res, next) => {
+//     const token = req.cookies.token;
+//     if (!token) return next();
+//     try {
+//       const decoded = jwt.verify(token, "SECRET_KEY");
+//       req.user = decoded;
+//       next();
+//     } catch (error) {
+//       console.error(error);
+//       res.status(401).send({ message: "Invalid token" });
+//     }
+//   }
+// )
 
 app.get("/", (req, res) => {
   res.send("hello from simple server :)");
@@ -714,7 +731,8 @@ app.post("/login", async (req, res) => {
   const { email, password } = req.body;
   try {
     const existingUser = await User.findOne({ email: email });
-    if (!existingUser) return res.status(403).send({ message: "User not found" });
+    if (!existingUser)
+      return res.status(403).send({ message: "User not found" });
     const match = await bcrypt.compare(password, existingUser.password);
     if (!match) return res.status(401).send({ message: "Invalid Password" });
     const token = await jwt.sign(
@@ -733,12 +751,35 @@ app.post("/login", async (req, res) => {
 app.post("/logout", async (req, res) => {
   try {
     res.clearCookie("token", { path: "/" });
-    res.send({ message : "Loggedout Successful!" });
+    res.send({ message: "Loggedout Successful!" });
   } catch (error) {
     console.error(error);
     res.status(500).send({ message: "Loggedout Failed" });
   }
 });
+
+app.get("/profile", Authenticate, (req, res) => {
+  const user = req.user.existingUser;
+  res.send({ message: "Welcome to Profile!", user: user });
+});
+
+//todo: Middleware which can be used for protected routes
+function Authenticate(req, res, next) {
+  console.log(req.cookies.token);
+  const token = req.cookies.token;
+  if (!token) return res.status(401).send({ message: "Access Denied" });
+  //todo: Method 1 of Authenticate
+  // jwt.verify(token, "SECRET_KEY", (err, user) => {
+  //   if (err) return res.status(403).send({ message: "Access Denied" });
+  //   req.user = user;
+  //   next();
+  // });
+  //todo: Method 2 of Authenticate
+  const decoded = jwt.verify(token, "SECRET_KEY");
+  if (!decoded) return res.status(403).send({ message: "Access Denied" });
+  req.user = decoded;
+  next();
+}
 
 app.listen(port, () =>
   console.log("> Server is up and running on port : " + port)
