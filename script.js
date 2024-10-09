@@ -657,6 +657,7 @@ import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { User } from "./models/Mini_Project/user.model.js";
+import { Post } from "./models/Mini_Project/posts.model.js";
 import cookieParser from "cookie-parser";
 const app = express();
 const port = process.env.PORT || 8000;
@@ -758,9 +759,42 @@ app.post("/logout", async (req, res) => {
   }
 });
 
-app.get("/profile", Authenticate, (req, res) => {
-  const user = req.user.existingUser;
-  res.send({ message: "Welcome to Profile!", user: user });
+// app.get("/profile", Authenticate, (req, res) => {
+//   const user = req.user.existingUser;
+//   console.log(user)
+//   res.send({ message: "Welcome to Profile!", user: user });
+// });
+
+app.get("/profile", Authenticate, async (req, res) => {
+  const { email } = req.user.existingUser;
+  const user = await User.findOne({ email });
+  const posts = await user.populate("posts");
+  console.log(posts);
+  res.send({ message: "Welcome to Profile!", user, posts });
+});
+
+// app.post("/profile", Authenticate, async (req, res) => {
+//   const user = req.user.existingUser;
+//   const { name, age } = req.body;
+//   user.name = name;
+//   user.age = age;
+//   try {
+//     await user.save();
+//     res.send({ message: "Profile updated successfully!", user: user });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).send({ message: "Error updating profile" });
+//   }
+// });
+
+app.post("/post", Authenticate, async (req, res) => {
+  // const user = req.user.existingUser;
+  const { content, email } = req.body;
+  const user = await User.findOne({ email });
+  const newPost = await Post.create({ content, user: user._id });
+  user.posts.push(newPost._id);
+  await user.save();
+  res.send({ message: "Post created successfully!", newPost });
 });
 
 //todo: Middleware which can be used for protected routes
@@ -777,6 +811,7 @@ function Authenticate(req, res, next) {
   //todo: Method 2 of Authenticate
   const decoded = jwt.verify(token, "SECRET_KEY");
   if (!decoded) return res.status(403).send({ message: "Access Denied" });
+  console.log(decoded);
   req.user = decoded;
   next();
 }
